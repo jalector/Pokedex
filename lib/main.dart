@@ -13,8 +13,7 @@ class MyApp extends StatelessWidget {
 }
 
 class Home extends StatelessWidget {
-
-  List<_PokemonCard> buildPokemonCards(){
+  List<_PokemonCard> buildPokemonCards() {
     List<Pokemon> pokedexInformation = Provider.getPokedexInformation();
     return List<_PokemonCard>.generate(pokedexInformation.length, (i) {
       return _PokemonCard(pokedexInformation[i]);
@@ -29,19 +28,17 @@ class Home extends StatelessWidget {
           SliverAppBar(
             pinned: true,
             expandedHeight: 250.0,
-            backgroundColor: Colors.orange[300],            
+            backgroundColor: Colors.orange[300],
             flexibleSpace: FlexibleSpaceBar(
-              titlePadding: EdgeInsets.only(top: 10, bottom: 5),
-              background: SafeArea(child: _HomeTitle()),
-              title: _PokemonSearchBar()
-            ),
+                titlePadding: EdgeInsets.only(top: 10, bottom: 5),
+                background: SafeArea(child: _HomeTitle()),
+                title: _PokemonSearchBar()),
           ),
           SliverGrid.count(
-            crossAxisCount: 2,
-            crossAxisSpacing: 3,
-            mainAxisSpacing: 3,
-            children: this.buildPokemonCards()
-          ),
+              crossAxisCount: 4,
+              crossAxisSpacing: 3,
+              mainAxisSpacing: 3,
+              children: this.buildPokemonCards()),
         ],
       ),
     );
@@ -54,14 +51,13 @@ class _HomeTitle extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
       decoration: BoxDecoration(
-        image: DecorationImage(
-          image: ExactAssetImage("assets/pikachu_background.jpg"),
-          fit: BoxFit.cover
-        )
-      ),
+          image: DecorationImage(
+              image: ExactAssetImage("assets/pikachu_background.jpg"),
+              fit: BoxFit.cover)),
       child: Text(
         "Gotta catch 'em all!",
-        style: TextStyle(fontSize: 60.0, fontWeight: FontWeight.bold, color: Colors.white70),
+        style: TextStyle(
+            fontSize: 60.0, fontWeight: FontWeight.bold, color: Colors.white70),
       ),
     );
   }
@@ -96,29 +92,71 @@ class _PokemonCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Column(
-        children: <Widget>[
-          Expanded(
-            child: FadeInImage.assetNetwork(
-              image: this.pokemon.thumbnailImage,
-              placeholder: 'assets/load_pokeball.gif',
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(context, MaterialPageRoute(builder: (_) {
+          return PokemonDetail(pokemon: this.pokemon);
+        }));
+      },
+      child: Card(
+        child: Column(
+          children: <Widget>[
+            Expanded(
+              child: Hero(
+                tag: 'pokemonImage' + this.pokemon.number,
+                child: FadeInImage.assetNetwork(
+                  image: this.pokemon.thumbnailImage,
+                  placeholder: 'assets/load_pokeball.gif',
+                ),
+              ),
+              flex: 5,
             ),
-            flex: 5,
-          ),
-          Expanded(
-            child: Text(this.pokemon.number+" "+this.pokemon.name),
-            flex: 1,
-          )
-        ],
-      )
+            Expanded(
+              child: Text(this.pokemon.number),
+              flex: 1,
+            )
+          ],
+        ),
+      ),
     );
   }
 }
 
+class PokemonDetail extends StatelessWidget {
+  final Pokemon pokemon;
+
+  PokemonDetail({Key key, @required this.pokemon}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Hero(
+                tag: 'pokemonImage' + this.pokemon.number,
+                child: FadeInImage.assetNetwork(
+                  image: this.pokemon.thumbnailImage,
+                  fit: BoxFit.contain,
+                  placeholder: 'assets/load_pokeball.gif',
+                ),
+              ),
+              Text(this.pokemon.name)
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 class Provider {
-  static List<Pokemon> getPokedexInformation(){
+  static List<Pokemon> getPokedexInformation() {
     return <Pokemon>[
       Pokemon(1, "Bulbasaur", "001"),
       Pokemon(1, "Ivysaur", "002"),
@@ -155,10 +193,10 @@ class Provider {
       Pokemon(1, "Nidorino", "034"),
       Pokemon(1, "NidoKing", "035"),
     ];
-  }  
+  }
 }
 
-class Pokemon{
+class Pokemon {
   int id;
   String name;
   String number;
@@ -168,7 +206,7 @@ class Pokemon{
     this.id = id;
     this.name = name;
     this.number = number;
-    this.thumbnailImage = 
-      "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/$number.png";
+    this.thumbnailImage =
+        "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/$number.png";
   }
 }
