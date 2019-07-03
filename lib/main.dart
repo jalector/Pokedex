@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 void main() => runApp(MyApp());
 
@@ -13,10 +15,17 @@ class MyApp extends StatelessWidget {
 }
 
 class Home extends StatelessWidget {
-  List<_PokemonCard> buildPokemonCards() {
-    List<Pokemon> pokedexInformation = Provider.getPokedexInformation();
-    return List<_PokemonCard>.generate(pokedexInformation.length, (i) {
-      return _PokemonCard(pokedexInformation[i]);
+  Provider provider;
+
+  Home({Key key}) : super(key: key) {
+    this.provider = Provider();
+
+    this.provider.getPokedex();
+  }
+
+  List<PokemonCard> buildPokemonCards(List<Pokemon> pokedexInformation) {
+    return List<PokemonCard>.generate(pokedexInformation.length, (i) {
+      return PokemonCard(pokedexInformation[i]);
     });
   }
 
@@ -34,11 +43,32 @@ class Home extends StatelessWidget {
                 background: SafeArea(child: _HomeTitle()),
                 title: _PokemonSearchBar()),
           ),
-          SliverGrid.count(
-              crossAxisCount: 4,
-              crossAxisSpacing: 3,
-              mainAxisSpacing: 3,
-              children: this.buildPokemonCards()),
+          FutureBuilder<List<Pokemon>>(
+            future: provider.getPokedex(),
+            builder:
+                (BuildContext context, AsyncSnapshot<List<Pokemon>> snapshot) {
+              Widget futureWidget;
+
+              if (snapshot.hasData) {
+                var pokemonCards = this.buildPokemonCards(snapshot.data);
+                futureWidget = SliverGrid.count(
+                  crossAxisCount: 4,
+                  crossAxisSpacing: 3,
+                  mainAxisSpacing: 3,
+                  children: pokemonCards,
+                );
+              } else {
+                futureWidget = SliverGrid.count(
+                  crossAxisCount: 4,
+                  crossAxisSpacing: 3,
+                  mainAxisSpacing: 3,
+                  children: [CircularProgressIndicator()],
+                );
+              }
+
+              return futureWidget;
+            },
+          ),
         ],
       ),
     );
@@ -85,10 +115,10 @@ class _PokemonSearchBar extends StatelessWidget {
   }
 }
 
-class _PokemonCard extends StatelessWidget {
+class PokemonCard extends StatelessWidget {
   final Pokemon pokemon;
 
-  _PokemonCard(this.pokemon);
+  PokemonCard(this.pokemon);
 
   @override
   Widget build(BuildContext context) {
@@ -103,7 +133,7 @@ class _PokemonCard extends StatelessWidget {
           children: <Widget>[
             Expanded(
               child: Hero(
-                tag: 'pokemonImage' + this.pokemon.number,
+                tag: 'pokemonImage' + this.pokemon.id.toString(),
                 child: FadeInImage.assetNetwork(
                   image: this.pokemon.thumbnailImage,
                   placeholder: 'assets/load_pokeball.gif',
@@ -112,7 +142,7 @@ class _PokemonCard extends StatelessWidget {
               flex: 5,
             ),
             Expanded(
-              child: Text(this.pokemon.number),
+              child: Text(this.pokemon.name),
               flex: 1,
             )
           ],
@@ -156,6 +186,19 @@ class PokemonDetail extends StatelessWidget {
 }
 
 class Provider {
+  Future<List<Pokemon>> getPokedex() async {
+    List<Pokemon> answer = [];
+
+    http.Response response =
+        await http.get("https://www.pokemon.com/es/api/pokedex/kalos");
+    if (response.statusCode == 200) {
+      List<dynamic> content = json.decode(response.body);
+      answer = Pokemon.fromJSONCollection(content);
+    }
+
+    return answer;
+  }
+
   static List<Pokemon> getPokedexInformation() {
     return <Pokemon>[
       Pokemon(1, "Bulbasaur", "001"),
@@ -208,5 +251,25 @@ class Pokemon {
     this.number = number;
     this.thumbnailImage =
         "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/$number.png";
+  }
+
+  static Pokemon fromJSON(Map<String, dynamic> json) {
+    return Pokemon(
+      json["id"],
+      json["name"],
+      json["number"],
+    );
+  }
+
+  static List<Pokemon> fromJSONCollection(List json) {
+    List<Pokemon> list = [];
+    int i = 0;
+    for (var wildPokemon in json) {
+      var pokemon = Pokemon.fromJSON(wildPokemon);
+      pokemon.id = i++;
+      list.add(pokemon);
+    }
+
+    return list;
   }
 }
