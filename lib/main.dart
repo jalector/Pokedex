@@ -15,13 +15,9 @@ class MyApp extends StatelessWidget {
 }
 
 class Home extends StatelessWidget {
-  Provider provider;
+  final Provider provider = Provider();
 
-  Home({Key key}) : super(key: key) {
-    this.provider = Provider();
-
-    this.provider.getPokedex();
-  }
+  Home({Key key}) : super(key: key);
 
   List<PokemonCard> buildPokemonCards(List<Pokemon> pokedexInformation) {
     return List<PokemonCard>.generate(pokedexInformation.length, (i) {
@@ -32,6 +28,7 @@ class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       body: CustomScrollView(
         slivers: <Widget>[
           SliverAppBar(
@@ -43,31 +40,43 @@ class Home extends StatelessWidget {
                 background: SafeArea(child: _HomeTitle()),
                 title: _PokemonSearchBar()),
           ),
-          FutureBuilder<List<Pokemon>>(
-            future: provider.getPokedex(),
-            builder:
-                (BuildContext context, AsyncSnapshot<List<Pokemon>> snapshot) {
-              Widget futureWidget;
+          SliverPadding(
+            padding: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+            sliver: FutureBuilder<List<Pokemon>>(
+              future: provider.getPokedex(),
+              builder: (BuildContext context,
+                  AsyncSnapshot<List<Pokemon>> snapshot) {
+                Widget futureWidget;
 
-              if (snapshot.hasData) {
-                var pokemonCards = this.buildPokemonCards(snapshot.data);
-                futureWidget = SliverGrid.count(
-                  crossAxisCount: 4,
-                  crossAxisSpacing: 3,
-                  mainAxisSpacing: 3,
-                  children: pokemonCards,
-                );
-              } else {
-                futureWidget = SliverGrid.count(
-                  crossAxisCount: 4,
-                  crossAxisSpacing: 3,
-                  mainAxisSpacing: 3,
-                  children: [CircularProgressIndicator()],
-                );
-              }
+                if (snapshot.hasData) {
+                  var pokemonCards = this.buildPokemonCards(snapshot.data);
+                  futureWidget = SliverGrid.count(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 3,
+                    mainAxisSpacing: 3,
+                    children: pokemonCards,
+                  );
+                } else {
+                  futureWidget = SliverList(
+                    delegate: SliverChildListDelegate([
+                      Center(
+                        widthFactor: 200,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: CircularProgressIndicator(
+                            semanticsLabel: "Loading",
+                            semanticsValue: "Loading",
+                            backgroundColor: Colors.orange[300],
+                          ),
+                        ),
+                      ),
+                    ]),
+                  );
+                }
 
-              return futureWidget;
-            },
+                return futureWidget;
+              },
+            ),
           ),
         ],
       ),
@@ -129,6 +138,7 @@ class PokemonCard extends StatelessWidget {
         }));
       },
       child: Card(
+        margin: EdgeInsets.all(5),
         child: Column(
           children: <Widget>[
             Expanded(
@@ -169,14 +179,21 @@ class PokemonDetail extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               Hero(
-                tag: 'pokemonImage' + this.pokemon.number,
+                tag: 'pokemonImage' + this.pokemon.id.toString(),
                 child: FadeInImage.assetNetwork(
                   image: this.pokemon.thumbnailImage,
-                  fit: BoxFit.contain,
                   placeholder: 'assets/load_pokeball.gif',
                 ),
               ),
-              Text(this.pokemon.name)
+              Center(
+                child: Text(
+                  this.pokemon.name,
+                  style: TextStyle(
+                      color: Colors.white54,
+                      fontSize: 80,
+                      fontWeight: FontWeight.bold),
+                ),
+              )
             ],
           ),
         ),
@@ -195,47 +212,7 @@ class Provider {
       List<dynamic> content = json.decode(response.body);
       answer = Pokemon.fromJSONCollection(content);
     }
-
     return answer;
-  }
-
-  static List<Pokemon> getPokedexInformation() {
-    return <Pokemon>[
-      Pokemon(1, "Bulbasaur", "001"),
-      Pokemon(1, "Ivysaur", "002"),
-      Pokemon(1, "Venusaur", "003"),
-      Pokemon(1, "Charmander", "004"),
-      Pokemon(1, "Charmeleon", "005"),
-      Pokemon(1, "Charizard", "006"),
-      Pokemon(1, "Squirtle", "007"),
-      Pokemon(1, "Wartortle", "008"),
-      Pokemon(1, "Blastoise", "009"),
-      Pokemon(1, "Caterpie", "010"),
-      Pokemon(1, "Metapod", "011"),
-      Pokemon(1, "Butterfree", "012"),
-      Pokemon(1, "Weedle", "013"),
-      Pokemon(1, "Kakuna", "014"),
-      Pokemon(1, "Beedrill", "015"),
-      Pokemon(1, "Pidgey", "016"),
-      Pokemon(1, "Pidgeotto", "017"),
-      Pokemon(1, "Pidgeot", "018"),
-      Pokemon(1, "Ratta", "019"),
-      Pokemon(1, "Raticate", "020"),
-      Pokemon(1, "Spearow", "021"),
-      Pokemon(1, "Ferow", "022"),
-      Pokemon(1, "Ecans", "023"),
-      Pokemon(1, "Arbok", "024"),
-      Pokemon(1, "Pikachu", "025"),
-      Pokemon(1, "Raichu", "026"),
-      Pokemon(1, "Sandshrew", "027"),
-      Pokemon(1, "Sandlash", "028"),
-      Pokemon(1, "Nidoran", "029"),
-      Pokemon(1, "Nidorina", "031"),
-      Pokemon(1, "Nidoqueen", "032"),
-      Pokemon(1, "Nidoran", "033"),
-      Pokemon(1, "Nidorino", "034"),
-      Pokemon(1, "NidoKing", "035"),
-    ];
   }
 }
 
@@ -261,12 +238,12 @@ class Pokemon {
     );
   }
 
-  static List<Pokemon> fromJSONCollection(List json) {
+  static List<Pokemon> fromJSONCollection(List json, {int limit = 300}) {
     List<Pokemon> list = [];
-    int i = 0;
-    for (var wildPokemon in json) {
-      var pokemon = Pokemon.fromJSON(wildPokemon);
-      pokemon.id = i++;
+
+    for (var i = 0; i < limit; i++) {
+      var pokemon = Pokemon.fromJSON(json[i]);
+      pokemon.id = i;
       list.add(pokemon);
     }
 
