@@ -25,8 +25,14 @@ class Pokemon {
 
     for (var i = 0; i < limit; i++) {
       var pokemon = Pokemon.fromJSON(json[i]);
-      pokemon.id = i;
-      list.add(pokemon);
+      if (i > 0) {
+        if (list.last.number == pokemon.number) continue;
+        pokemon.id = i;
+        list.add(pokemon);
+      } else {
+        pokemon.id = i;
+        list.add(pokemon);
+      }
     }
 
     return list;

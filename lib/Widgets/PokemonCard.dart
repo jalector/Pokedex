@@ -11,54 +11,84 @@ class PokemonCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-        onTap: () {
-          Navigator.push(context, MaterialPageRoute(builder: (_) {
-            return PokemonDetail(pokemon: this.pokemon);
-          }));
-        },
-        child: Container(
-          margin: EdgeInsets.all(5),
-          decoration: BoxDecoration(
-              color: Colors.orange[200],
-              borderRadius: BorderRadius.circular(5),
-              border: Border.all(
-                color: Colors.orange[400],
-                width: 2,
+      onDoubleTap: () {
+        Navigator.push(context, MaterialPageRoute(builder: (_) {
+          return PokemonDetail(pokemon: this.pokemon);
+        }));
+      },
+      child: Stack(
+        children: <Widget>[
+          Card(
+            color: Colors.orangeAccent,
+            elevation: 3,
+            child: Hero(
+              tag: 'pokemonImage' + this.pokemon.id.toString(),
+              child: FadeInImage.assetNetwork(
+                image: this.pokemon.thumbnailImage,
+                imageSemanticLabel: "Pokemon",
+                placeholderSemanticLabel: "Loading",
+                placeholderScale: 0.7,
+                placeholder: 'assets/load_pokeball.gif',
               ),
-              image: DecorationImage(
-                image: ExactAssetImage("assets/pokeball.png", scale: 3.5),
-                alignment: Alignment(8, 8),
-                fit: BoxFit.none,
-              )),
-          child: Stack(
-            children: <Widget>[
-              Positioned(
-                child: Text(
-                  this.pokemon.number,
-                  style: TextStyle(
-                    color: Colors.black26,
-                    fontSize: 70,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                bottom: -5,
-                right: 0,
-              ),
-              Positioned(
-                top: -20,
-                right: 10,
-                height: 170,
-                width: 170,
-                child: Hero(
-                  tag: 'pokemonImage' + this.pokemon.id.toString(),
-                  child: FadeInImage.assetNetwork(
-                    image: this.pokemon.thumbnailImage,
-                    placeholder: 'assets/load_pokeball.gif',
-                  ),
-                ),
-              )
-            ],
+            ),
           ),
-        ));
+          Positioned(
+            bottom: 0,
+            left: 0,
+            child: Container(
+              padding: EdgeInsets.symmetric(vertical: 1, horizontal: 5),
+              decoration: BoxDecoration(
+                color: Colors.redAccent,
+                borderRadius: BorderRadius.circular(5),
+              ),
+              child: Text(this.pokemon.name),
+            ),
+          )
+        ],
+      ),
+    );
   }
 }
+/**
+ * 
+ Container(
+              margin: EdgeInsets.all(5),
+              decoration: BoxDecoration(
+                color: Colors.orange[200],
+                borderRadius: BorderRadius.circular(5),
+                border: Border.all(
+                  color: Colors.orange[400],
+                  width: 2,
+                ),
+              ),
+              child: Stack(
+                children: <Widget>[
+                  Positioned(
+                    child: Text(
+                      this.pokemon.number,
+                      style: TextStyle(
+                        color: Colors.black26,
+                        fontSize: 60,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    top: -10,
+                    left: -10,
+                  ),
+                  Positioned(
+                    bottom: -50,
+                    left: 20,
+                    height: 160,
+                    width: 160,
+                    child: Hero(
+                      tag: 'pokemonImage' + this.pokemon.id.toString(),
+                      child: FadeInImage.assetNetwork(
+                        image: this.pokemon.thumbnailImage,
+                        placeholder: 'assets/load_pokeball.gif',
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            );
+ */
