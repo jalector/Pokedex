@@ -40,7 +40,7 @@ class Home extends StatelessWidget {
                 if (snapshot.hasData) {
                   var pokemonCards = this.buildPokemonCards(snapshot.data);
                   futureWidget = SliverGrid.extent(
-                    maxCrossAxisExtent: 130,
+                    maxCrossAxisExtent: 200,
                     crossAxisSpacing: 3,
                     mainAxisSpacing: 3,
                     children: pokemonCards,
