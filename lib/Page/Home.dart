@@ -3,10 +3,53 @@ import 'package:Pokedex/Provider/GlobalRequest.dart';
 import 'package:Pokedex/Widgets/PokemonCard.dart';
 import 'package:flutter/material.dart';
 
-class Home extends StatelessWidget {
-  final GlobalRequest globalRequest = GlobalRequest();
-
+class Home extends StatefulWidget {
   Home({Key key}) : super(key: key);
+  _HomeState createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+  final GlobalRequest globalRequest = GlobalRequest();
+  List<PokemonCard> baseList;
+  List<PokemonCard> filterList;
+  String searchedPokemon;
+  TextEditingController searchedPokemonCtrl;
+
+  _HomeState() {
+    this.searchedPokemon = "";
+    this.baseList = [];
+    this.filterList = [];
+
+    this.searchedPokemonCtrl = new TextEditingController();
+
+    searchedPokemonCtrl.addListener(() {
+      if (searchedPokemonCtrl.text.isEmpty) {
+        setState(() {
+          searchedPokemon = "";
+          filterList = baseList;
+        });
+      } else {
+        setState(() {
+          searchedPokemon = searchedPokemonCtrl.text.toLowerCase();
+        });
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    this._getPokedex();
+    super.initState();
+  }
+
+  void _getPokedex() async {
+    var list = this.buildPokemonCards(await this.globalRequest.getPokedex());
+
+    setState(() {
+      this.baseList = list;
+      this.filterList = this.baseList;
+    });
+  }
 
   List<PokemonCard> buildPokemonCards(List<Pokemon> pokedexInformation) {
     return List<PokemonCard>.generate(pokedexInformation.length, (i) {
@@ -14,66 +57,27 @@ class Home extends StatelessWidget {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: CustomScrollView(
-        slivers: <Widget>[
-          SliverAppBar(
-            pinned: true,
-            expandedHeight: 250.0,
-            backgroundColor: Colors.orange[300],
-            flexibleSpace: FlexibleSpaceBar(
-                titlePadding: EdgeInsets.only(top: 10, bottom: 5),
-                background: SafeArea(child: _HomeTitle()),
-                title: _PokemonSearchBar()),
-          ),
-          SliverPadding(
-            padding: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
-            sliver: FutureBuilder<List<Pokemon>>(
-              future: globalRequest.getPokedex(),
-              builder: (BuildContext context,
-                  AsyncSnapshot<List<Pokemon>> snapshot) {
-                Widget futureWidget;
-
-                if (snapshot.hasData) {
-                  var pokemonCards = this.buildPokemonCards(snapshot.data);
-                  futureWidget = SliverGrid.extent(
-                    maxCrossAxisExtent: 200,
-                    crossAxisSpacing: 3,
-                    mainAxisSpacing: 3,
-                    children: pokemonCards,
-                  );
-                } else {
-                  futureWidget = SliverList(
-                    delegate: SliverChildListDelegate([
-                      Center(
-                        widthFactor: 200,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: CircularProgressIndicator(
-                            backgroundColor: Colors.orange[300],
-                          ),
-                        ),
-                      ),
-                    ]),
-                  );
-                }
-
-                return futureWidget;
-              },
-            ),
-          ),
-        ],
+  Widget _buildSearchBar() {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 0.0, horizontal: 5.0),
+      margin: EdgeInsets.symmetric(horizontal: 10.0),
+      decoration: BoxDecoration(
+          color: Colors.black87, borderRadius: BorderRadius.circular(15.0)),
+      child: TextField(
+        controller: searchedPokemonCtrl,
+        decoration: InputDecoration(
+          icon: Icon(Icons.search, color: Colors.orangeAccent),
+          border: InputBorder.none,
+          hintText: "Type your pokemon name..",
+          hintStyle:
+              TextStyle(fontWeight: FontWeight.bold, color: Colors.white30),
+        ),
+        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
       ),
     );
   }
-}
 
-class _HomeTitle extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildTitle() {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
       decoration: BoxDecoration(
@@ -87,25 +91,45 @@ class _HomeTitle extends StatelessWidget {
       ),
     );
   }
-}
 
-class _PokemonSearchBar extends StatelessWidget {
+  List<PokemonCard> buildFiteredList() {
+    List<PokemonCard> filtered = [];
+    for (var card in this.baseList) {
+      if (card.pokemon.name.toLowerCase().contains(this.searchedPokemon)) {
+        filtered.add(card);
+      }
+    }
+    return filtered;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 0.0, horizontal: 5.0),
-      margin: EdgeInsets.symmetric(horizontal: 10.0),
-      decoration: BoxDecoration(
-          color: Colors.black87, borderRadius: BorderRadius.circular(15.0)),
-      child: TextField(
-        decoration: InputDecoration(
-          icon: Icon(Icons.search, color: Colors.orangeAccent),
-          border: InputBorder.none,
-          hintText: "Type your pokemon name..",
-          hintStyle:
-              TextStyle(fontWeight: FontWeight.bold, color: Colors.white30),
-        ),
-        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(
+            pinned: true,
+            expandedHeight: 250.0,
+            backgroundColor: Colors.orange[300],
+            flexibleSpace: FlexibleSpaceBar(
+              titlePadding: EdgeInsets.only(top: 10, bottom: 5),
+              background: SafeArea(
+                child: _buildTitle(),
+              ),
+              title: _buildSearchBar(),
+            ),
+          ),
+          SliverPadding(
+            padding: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+            sliver: SliverGrid.extent(
+              maxCrossAxisExtent: 90,
+              crossAxisSpacing: 3,
+              mainAxisSpacing: 3,
+              children: this.buildFiteredList(),
+            ),
+          ),
+        ],
       ),
     );
   }
