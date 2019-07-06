@@ -53,8 +53,6 @@ class Home extends StatelessWidget {
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: CircularProgressIndicator(
-                            semanticsLabel: "Loading",
-                            semanticsValue: "Loading",
                             backgroundColor: Colors.orange[300],
                           ),
                         ),

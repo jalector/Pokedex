@@ -1,4 +1,3 @@
-
 import 'package:Pokedex/Model/Pokemon.dart';
 import 'package:flutter/material.dart';
 
@@ -30,7 +29,7 @@ class PokemonDetail extends StatelessWidget {
                   this.pokemon.name,
                   style: TextStyle(
                       color: Colors.white54,
-                      fontSize: 80,
+                      fontSize: 60,
                       fontWeight: FontWeight.bold),
                 ),
               )
@@ -41,5 +40,3 @@ class PokemonDetail extends StatelessWidget {
     );
   }
 }
-
-
