@@ -2,22 +2,51 @@ class Pokemon {
   int id;
   String name;
   String number;
+  double height;
+  double weight;
+  List<String> weakness;
   String thumbnailImage;
+  List<String> type;
 
-  Pokemon(int id, String name, String number) {
-    this.id = id;
-    this.name = name;
-    this.number = number;
-    this.thumbnailImage =
-        "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/$number.png";
+  Pokemon({
+    this.id,
+    this.name,
+    this.number,
+    this.type,
+    this.weight,
+    this.height,
+    this.weakness,
+  }) {
+    if (this.number != null) {
+      this.thumbnailImage =
+          "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/$number.png";
+    }
+    if (this.weakness == null) {
+      this.weakness = [];
+    }
+    if (this.type == null) {
+      this.type = [];
+    }
   }
 
   static Pokemon fromJSON(Map<String, dynamic> json) {
-    return Pokemon(
-      json["id"],
-      json["name"],
-      json["number"],
+    var pokemon = Pokemon(
+      id: json["id"],
+      name: json["name"],
+      number: json["number"],
+      height: json["height"],
+      weight: json["weight"],
     );
+
+    for (var type in json["type"]) {
+      pokemon.type.add(type.toString());
+    }
+
+    for (var weak in json["weakness"]) {
+      pokemon.weakness.add(weak.toString());
+    }
+
+    return pokemon;
   }
 
   static List<Pokemon> fromJSONCollection(List json, {int limit = 300}) {
