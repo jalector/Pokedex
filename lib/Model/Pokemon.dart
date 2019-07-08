@@ -3,21 +3,23 @@ class Pokemon {
   String name;
   String number;
   String thumbnailImage;
+  List<String> type;
 
-  Pokemon(int id, String name, String number) {
-    this.id = id;
-    this.name = name;
-    this.number = number;
-    this.thumbnailImage =
-        "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/$number.png";
+  Pokemon({this.id, this.name, this.number, this.type}) {
+    if (this.number != null) {
+      this.thumbnailImage =
+          "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/$number.png";
+    }
   }
 
   static Pokemon fromJSON(Map<String, dynamic> json) {
-    return Pokemon(
-      json["id"],
-      json["name"],
-      json["number"],
-    );
+    Pokemon pokemon = Pokemon(
+        id: json["id"],
+        name: json["name"],
+        number: json["number"],
+        type: json["types"]);
+
+    return pokemon;
   }
 
   static List<Pokemon> fromJSONCollection(List json, {int limit = 300}) {
