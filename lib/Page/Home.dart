@@ -1,5 +1,6 @@
 import 'package:Pokedex/Model/Pokemon.dart';
 import 'package:Pokedex/Provider/GlobalRequest.dart';
+import 'package:Pokedex/Widgets/PokemonCard.dart';
 import 'package:flutter/material.dart';
 
 class Home extends StatefulWidget {
@@ -9,40 +10,27 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final GlobalRequest globalRequest = GlobalRequest();
-  List<Pokemon> baseList;
-  List<Pokemon> filterList;
+  List<PokemonCard> baseList;
+  List<PokemonCard> filterList;
   String searchedPokemon;
   TextEditingController searchedPokemonCtrl;
-  PageController controller;
-  int currentPage = 0;
 
   _HomeState() {
     this.searchedPokemon = "";
     this.baseList = [];
     this.filterList = [];
-    this.searchedPokemonCtrl = new TextEditingController();
-    this.controller = PageController(viewportFraction: 0.8);
 
-    controller.addListener(() {
-      int next = controller.page.round();
-      if (currentPage != next) {
-        setState(() {
-          currentPage = next;
-        });
-      }
-    });
+    this.searchedPokemonCtrl = new TextEditingController();
 
     searchedPokemonCtrl.addListener(() {
       if (searchedPokemonCtrl.text.isEmpty) {
-        currentPage = 0;
         setState(() {
           searchedPokemon = "";
-          this.filterList = this.baseList;
+          filterList = baseList;
         });
       } else {
         setState(() {
           searchedPokemon = searchedPokemonCtrl.text.toLowerCase();
-          this.filterList = this.buildFiteredList();
         });
       }
     });
@@ -55,11 +43,17 @@ class _HomeState extends State<Home> {
   }
 
   void _getPokedex() async {
-    var list = await this.globalRequest.getPokedex();
+    var list = this.buildPokemonCards(await this.globalRequest.getPokedex());
 
     setState(() {
       this.baseList = list;
       this.filterList = this.baseList;
+    });
+  }
+
+  List<PokemonCard> buildPokemonCards(List<Pokemon> pokedexInformation) {
+    return List<PokemonCard>.generate(pokedexInformation.length, (i) {
+      return PokemonCard(pokedexInformation[i]);
     });
   }
 
@@ -98,11 +92,11 @@ class _HomeState extends State<Home> {
     );
   }
 
-  List<Pokemon> buildFiteredList() {
-    List<Pokemon> filtered = [];
-    for (var pokemon in this.baseList) {
-      if (pokemon.name.toLowerCase().contains(this.searchedPokemon)) {
-        filtered.add(pokemon);
+  List<PokemonCard> buildFiteredList() {
+    List<PokemonCard> filtered = [];
+    for (var card in this.baseList) {
+      if (card.pokemon.name.toLowerCase().contains(this.searchedPokemon)) {
+        filtered.add(card);
       }
     }
     return filtered;
@@ -132,42 +126,7 @@ class _HomeState extends State<Home> {
               maxCrossAxisExtent: 210,
               crossAxisSpacing: 3,
               mainAxisSpacing: 3,
-              children: [
-                PageView.builder(
-                  controller: controller,
-                  itemCount: this.filterList.length,
-                  itemBuilder: (context, int currentIndex) {
-                    bool active = currentIndex == currentPage;
-                    final double blur = active ? 30 : 0;
-                    final double offset = active ? 20 : 0;
-                    final double top = active ? 10 : 60;
-                    final current = this.filterList[currentIndex];
-
-                    return AnimatedContainer(
-                      duration: Duration(milliseconds: 300),
-                      curve: Curves.easeIn,
-                      margin: EdgeInsets.only(top: top, bottom: 50, right: 30),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        color: Colors.orange[300],
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black87,
-                            blurRadius: blur,
-                            offset: Offset(offset, offset),
-                          ),
-                        ],
-                      ),
-                      child: Center(
-                        child: Text(
-                          current.name,
-                          style: TextStyle(fontSize: 40, color: Colors.white),
-                        ),
-                      ),
-                    );
-                  },
-                )
-              ],
+              children: this.buildFiteredList(),
             ),
           ),
         ],
