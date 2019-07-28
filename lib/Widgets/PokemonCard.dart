@@ -14,7 +14,7 @@ class PokemonCard extends StatelessWidget {
     TextStyle title = TextStyle(fontWeight: FontWeight.bold);
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
-      child: Row(
+      child: Column(
         children: <Widget>[
           Flexible(
             flex: 15,
