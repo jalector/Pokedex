@@ -121,11 +121,11 @@ class _HomeState extends State<Home> {
             ),
           ),
           SliverPadding(
-            padding: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+            padding: EdgeInsets.symmetric(vertical: 5, horizontal: 5),
             sliver: SliverGrid.extent(
-              maxCrossAxisExtent: 210,
-              crossAxisSpacing: 3,
-              mainAxisSpacing: 3,
+              maxCrossAxisExtent: 75,
+              crossAxisSpacing: 2,
+              mainAxisSpacing: 2,
               children: this.buildFiteredList(),
             ),
           ),

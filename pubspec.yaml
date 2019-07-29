@@ -52,6 +52,9 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/
+    - assets/badges/
+    - assets/poke_pixel/
+    - assets/pokemon_icons/
   #  - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
