@@ -11,4 +11,4 @@ flutter pug get
 flutter run -d chrome
 ```
 
-![Preview](assets/video.mp4)
+![Preview](assets/preview.gif)
