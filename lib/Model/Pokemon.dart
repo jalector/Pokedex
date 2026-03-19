@@ -5,28 +5,22 @@ class Pokemon {
   double height;
   double weight;
   List<String> weakness;
-  String thumbnailImage;
   List<String> type;
 
   Pokemon({
-    this.id,
-    this.name,
-    this.number,
-    this.type,
-    this.weight,
-    this.height,
-    this.weakness,
-  }) {
-    if (this.number != null) {
-      this.thumbnailImage =
-          "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/$number.png";
-    }
-    if (this.weakness == null) {
-      this.weakness = [];
-    }
-    if (this.type == null) {
-      this.type = [];
-    }
+    required this.id,
+    required this.name,
+    required this.weight,
+    required this.height,
+    this.number = '',
+    this.weakness = const [],
+    this.type = const [],
+  });
+
+  String? get thumbnailImage {
+    return this.number.isNotEmpty
+        ? "https://assets.pokemon.com/assets/cms2/img/pokedex/detail/$number.png"
+        : null;
   }
 
   static Pokemon fromJSON(Map<String, dynamic> json) {
@@ -36,6 +30,10 @@ class Pokemon {
       number: json["number"],
       height: json["height"],
       weight: json["weight"],
+      type: (json["type"] as List).map<String>((e) => e.toString()).toList(),
+      weakness: (json["weakness"] as List)
+          .map<String>((e) => e.toString())
+          .toList(),
     );
 
     for (var type in json["type"]) {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'Page/Home.dart';
+import 'page/home.dart';
 
 void main() => runApp(MyApp());
 
@@ -8,7 +8,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Pokedex',
-      home: new Home(),
+      home: Home(),
     );
   }
 }

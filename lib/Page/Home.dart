@@ -1,26 +1,25 @@
-import 'package:Pokedex/Model/Pokemon.dart';
-import 'package:Pokedex/Provider/GlobalRequest.dart';
-import 'package:Pokedex/Widgets/PokemonCard.dart';
+import 'package:pokedex/model/pokemon.dart';
+import 'package:pokedex/provider/global_request.dart';
+import 'package:pokedex/widgets/pokemon_card.dart';
 import 'package:flutter/material.dart';
 
 class Home extends StatefulWidget {
-  Home({Key key}) : super(key: key);
   _HomeState createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
   final GlobalRequest globalRequest = GlobalRequest();
-  List<PokemonCard> baseList;
-  List<PokemonCard> filterList;
-  String searchedPokemon;
-  TextEditingController searchedPokemonCtrl;
+  List<PokemonCard> baseList = [];
+  List<PokemonCard> filterList = [];
+  String searchedPokemon = '';
+  TextEditingController searchedPokemonCtrl = TextEditingController();
 
-  _HomeState() {
+  @override
+  void initState() {
+    super.initState();
     this.searchedPokemon = "";
     this.baseList = [];
     this.filterList = [];
-
-    this.searchedPokemonCtrl = new TextEditingController();
 
     searchedPokemonCtrl.addListener(() {
       if (searchedPokemonCtrl.text.isEmpty) {
@@ -34,12 +33,8 @@ class _HomeState extends State<Home> {
         });
       }
     });
-  }
 
-  @override
-  void initState() {
     this._getPokedex();
-    super.initState();
   }
 
   void _getPokedex() async {
@@ -62,15 +57,19 @@ class _HomeState extends State<Home> {
       padding: EdgeInsets.symmetric(vertical: 0.0, horizontal: 5.0),
       margin: EdgeInsets.symmetric(horizontal: 10.0),
       decoration: BoxDecoration(
-          color: Colors.black87, borderRadius: BorderRadius.circular(15.0)),
+        color: Colors.black87,
+        borderRadius: BorderRadius.circular(15.0),
+      ),
       child: TextField(
         controller: searchedPokemonCtrl,
         decoration: InputDecoration(
           icon: Icon(Icons.search, color: Colors.orangeAccent),
           border: InputBorder.none,
           hintText: "Type your pokemon name..",
-          hintStyle:
-              TextStyle(fontWeight: FontWeight.bold, color: Colors.white30),
+          hintStyle: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white30,
+          ),
         ),
         style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
       ),
@@ -81,13 +80,18 @@ class _HomeState extends State<Home> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
       decoration: BoxDecoration(
-          image: DecorationImage(
-              image: ExactAssetImage("assets/pikachu_background.jpg"),
-              fit: BoxFit.cover)),
+        image: DecorationImage(
+          image: ExactAssetImage("assets/pikachu_background.jpg"),
+          fit: BoxFit.cover,
+        ),
+      ),
       child: Text(
         "Gotta catch 'em all!",
         style: TextStyle(
-            fontSize: 60.0, fontWeight: FontWeight.bold, color: Colors.white70),
+          fontSize: 60.0,
+          fontWeight: FontWeight.bold,
+          color: Colors.white70,
+        ),
       ),
     );
   }
@@ -114,9 +118,7 @@ class _HomeState extends State<Home> {
             backgroundColor: Colors.orange[300],
             flexibleSpace: FlexibleSpaceBar(
               titlePadding: EdgeInsets.only(top: 10, bottom: 5),
-              background: SafeArea(
-                child: _buildTitle(),
-              ),
+              background: SafeArea(child: _buildTitle()),
               title: _buildSearchBar(),
             ),
           ),
